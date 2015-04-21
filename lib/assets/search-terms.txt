@@ -1,0 +1,6 @@
+ruby
+rails
+ruby on rails
+javascipt
+junior
+test
