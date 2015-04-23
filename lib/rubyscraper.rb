@@ -1,40 +1,51 @@
 require 'capybara'
 require 'capybara/poltergeist'
+require 'rest-client'
 require 'rubyscraper/version'
 
-include Capybara::DSL
-
-Capybara.register_driver :poltergeist do |app|
-  Capybara::Poltergeist::Driver.new(app, js_errors: false)
-end
-
-Capybara.default_driver = :poltergeist
-
 class RubyScraper
-  def self.call(endpoint)
-    visit "http://careers.stackoverflow.com/jobs?searchTerm=ruby&sort=p"
-    start = Time.now
-    jobs = []
+  include Capybara::DSL
 
-    (1..2).to_a.each do |page|
-      visit "http://careers.stackoverflow.com/jobs?searchTerm=ruby&sort=p&pg=#{page}"
-
-      all(".listResults .-item").each do |listing|
-        position = listing.find("h3.-title a").text
-        url = listing.find("h3.-title a")["href"]
-        posting_date = listing.first("p._muted").text
-
-        jobs << {
-          position: position,
-          url: url,
-          posting_date: posting_date
-        }
-      end
-      puts "page #{page}"
+  def initialize(endpoint)
+    Capybara.register_driver :poltergeist do |app|
+      Capybara::Poltergeist::Driver.new(app, js_errors: false)
     end
+    Capybara.default_driver = :poltergeist
+    @jobs = []
+    @posted_jobs = 0
+    @endpoint = endpoint
+    @search_terms_file = File.expand_path('../assets/search-terms.txt', __FILE__)
+    @search_terms = []
+    File.foreach(@search_terms_file) { |x| @search_terms << x.strip }
+  end
 
-    jobs.each_with_index do |job, i|
-      puts "job pull #{i}"
+  def scrape
+    get_summaries
+    get_bodies
+    send_to_server
+    return @jobs.length, @posted_jobs
+  end
+
+  def get_summaries
+    @search_terms.each do |term|
+      visit "http://careers.stackoverflow.com/jobs?searchTerm=#{term}&sort=p"
+      (1..5).to_a.each do |page|
+        visit "http://careers.stackoverflow.com/jobs?searchTerm=ruby&sort=p&pg=#{page}"
+        all(".listResults .-item").each do |listing|
+          position = listing.find("h3.-title a").text
+          url = listing.find("h3.-title a")["href"]
+          posting_date = listing.first("p._muted").text
+
+          @jobs << { position: position, url: url, posting_date: posting_date }
+        end
+      end
+      puts "Pulled #{term} job summaries."
+    end
+  end
+
+  def get_bodies
+    @jobs.each_with_index do |job, i|
+      puts "Job #{i+1} pulled."
       sleep 1
       visit "http://careers.stackoverflow.com#{job[:url]}"
       if has_css?("a.employer")
@@ -53,36 +64,27 @@ class RubyScraper
       end
       job[:tags] = tags
     end
-
-    puts jobs.first
-    puts jobs.last
-    puts pages
-    elapsed = Time.now - start
-    puts elapsed
-    return jobs.length, 0
   end
 
-  def self.pull_rss(term)
-    base_address = 'http://careers.stackoverflow.com/jobs/feed'
-    rss = RSS::Parser.parse("#{base_address}?searchTerm=#{term}", false)
-    saved = 0
-    rss.items.each do |item|
-      item_saved = send_to_server(item)
-      saved += 1 if item_saved
+  def send_to_server
+    @jobs.each_with_index do |job, i|
+      new_job = {
+        position: job[:position],
+        location: job[:location],
+        description: job[:description],
+        source: "http://careers.stackoverflow.com#{job[:url]}"
+      }
+      RestClient.post(@endpoint, job: new_job){ |response, request, result, &block|
+        case response.code
+        when 201
+          @posted_jobs += 1
+          puts "Job saved."
+        when 302
+          puts "Job already exists."
+        else
+          puts "Bad request."
+        end
+      }
     end
-    return rss.items.count, saved
-  end
-
-  def self.send_to_server(rss_item)
-    date = DateTime.strptime(rss_item.pubDate.to_s, '%a, %e %b %Y %H:%M:%S %z')
-    # parse item contents
-    # item = item_contents.to_json
-    # RestClient.post(rails_server) {item}
-    # Send post request to Rails server containing all relevant data
-    # Rails server does a find_or_create_by on contents
-    # If item is found return a status code of not-created
-    # If item is created return 201
-    # If succesful save return true, else false
-    return true
   end
 end

@@ -1,6 +1,5 @@
 ruby
-rails
-ruby on rails
-javascipt
+ruby+on+rails
+javascript
 junior
-test
+full-stack
