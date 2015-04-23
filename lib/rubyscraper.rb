@@ -29,7 +29,7 @@ class RubyScraper
   def get_summaries
     @search_terms.each do |term|
       visit "http://careers.stackoverflow.com/jobs?searchTerm=#{term}&sort=p"
-      (1..5).to_a.each do |page|
+      (1..2).to_a.each do |page|
         visit "http://careers.stackoverflow.com/jobs?searchTerm=ruby&sort=p&pg=#{page}"
         all(".listResults .-item").each do |listing|
           position = listing.find("h3.-title a").text
