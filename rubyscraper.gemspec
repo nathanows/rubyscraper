@@ -1,27 +1,24 @@
-# coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+$LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
 require 'rubyscraper/version'
 
-Gem::Specification.new do |spec|
-  spec.name          = "rubyscraper"
-  spec.version       = RubyScraper::VERSION
-  spec.authors       = ["Nathan Owsiany"]
-  spec.email         = ["nowsiany@gmail.com"]
+Gem::Specification.new do |s|
+  s.name        = 'rubyscraper'
+  s.version     = RubyScraper::VERSION
+  s.licenses    = ['MIT']
+  s.summary     = "Scrapes the sites..."
+  s.description = "Scrapes job sites for job details and sends post request to server."
+  s.authors     = ["Nathan Owsiany"]
+  s.email       = 'nowsiany@gmail.com'
+  s.files       = Dir["**/*"].select { |f| File.file? f  } - Dir['*.gem']
+  s.homepage    = 'https://github.com/ndwhtlssthr/rubyscraper'
+  s.executables << 'rubyscraper'
 
-  spec.summary       = %q{Scrapes job sites for job details and send post request to server.}
-  spec.description   = %q{Scrapes the sites...}
-  spec.homepage      = "https://github.com/ndwhtlssthr/rubyscraper"
+  s.add_dependency "capybara"
+  s.add_dependency "poltergeist"
+  s.add_dependency "rest-client"
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.bindir        = "exe"
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
-  spec.require_paths = ["lib"]
-
-  spec.add_dependency "capybara"
-  spec.add_dependency "poltergeist"
-  spec.add_dependency "rest-client"
-
-  spec.add_development_dependency "bundler", "~> 1.9"
-  spec.add_development_dependency "rake", "~> 10.0"
+  s.add_development_dependency "bundler", "~> 1.9"
+  s.add_development_dependency "rake", "~> 10.0"
+  s.add_development_dependency 'rspec', '~> 3.0'
+  s.add_development_dependency 'pry'
 end
