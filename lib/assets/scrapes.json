@@ -1,0 +1,66 @@
+[
+  {
+    "name":"stackoverflow",
+    "base_url":"http://www.careers.stackoverflow.com",
+    "summary":{
+      "url":"/jobs?searchTerm=SEARCHTERM&sort=p",
+      "pagination_fmt":"&pg=",
+      "params":[
+        {
+          "SEARCHTERM":[
+            "ruby",
+            "ruby+on+rails",
+            "javascript"
+          ]
+        }
+      ],
+      "loop":".listResults .-item",
+      "fields":[
+        {
+          "field":"position",
+          "method":"find",
+          "path":"h3.-title a"
+        },
+        {
+          "field":"url",
+          "method":"find",
+          "path":"h3.-title a",
+          "attr":"href"
+        },
+        {
+          "field":"posting_date",
+          "method":"first",
+          "path":"p._muted"
+        }
+      ]
+    },
+    "sub_page":{
+      "fields":[
+        {
+          "field":"company",
+          "method":"find",
+          "path":"a.employer"
+        },
+        {
+          "field":"location",
+          "method":"find",
+          "path":"span.location"
+        },
+        {
+          "field":"description",
+          "method":"all",
+          "path":"div.description p",
+          "loop_collect":"text",
+          "join":"\n"
+        },
+        {
+          "field":"tags",
+          "method":"all",
+          "path":"div.tags a.post-tag",
+          "loop_collect":"text",
+          "join":", "
+        }
+      ]
+    }
+  }
+]

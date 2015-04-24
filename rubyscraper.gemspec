@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency "capybara"
   s.add_dependency "poltergeist"
   s.add_dependency "rest-client"
+  s.add_dependency "slop"
 
   s.add_development_dependency "bundler", "~> 1.9"
   s.add_development_dependency "rake", "~> 10.0"

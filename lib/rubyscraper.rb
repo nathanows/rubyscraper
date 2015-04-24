@@ -5,79 +5,105 @@ require 'rubyscraper/version'
 
 class RubyScraper
   include Capybara::DSL
+  attr_reader :scrape_config, :pages, :jobs, :posted_jobs, :endpoint
 
-  def initialize(endpoint)
+  def initialize(endpoint, pages=1)
     Capybara.register_driver :poltergeist do |app|
       Capybara::Poltergeist::Driver.new(app, js_errors: false)
     end
     Capybara.default_driver = :poltergeist
+
     @jobs = []
     @posted_jobs = 0
+    @pages = pages
     @endpoint = endpoint
-    @search_terms_file = File.expand_path('../assets/search-terms.txt', __FILE__)
-    @search_terms = []
-    File.foreach(@search_terms_file) { |x| @search_terms << x.strip }
+    @scrape_file = File.expand_path('../assets/scrapes.json', __FILE__)
+    @scrape_config = JSON.parse(File.read(@scrape_file))
   end
 
   def scrape
-    get_summaries
-    get_bodies
+    scrape_config.each do |site|
+      get_summaries(site)
+      get_bodies(site)
+    end
     send_to_server
-    return @jobs.length, @posted_jobs
+    return jobs.length, posted_jobs
   end
 
-  def get_summaries
-    @search_terms.each do |term|
-      visit "http://careers.stackoverflow.com/jobs?searchTerm=#{term}&sort=p"
-      (1..2).to_a.each do |page|
-        visit "http://careers.stackoverflow.com/jobs?searchTerm=ruby&sort=p&pg=#{page}"
-        all(".listResults .-item").each do |listing|
-          position = listing.find("h3.-title a").text
-          url = listing.find("h3.-title a")["href"]
-          posting_date = listing.first("p._muted").text
-
-          @jobs << { position: position, url: url, posting_date: posting_date }
+  def get_summaries(site)
+    site["summary"]["params"][0]["SEARCHTERM"].each do |term|
+      summary_url = "#{site["base_url"]}#{site["summary"]["url"].sub("SEARCHTERM", term)}"
+      (1..pages).to_a.each do |page|
+        visit "#{summary_url}#{site["summary"]["pagination_fmt"]}#{page}"
+        all(site["summary"]["loop"]).each do |listing|
+          job = pull_summary_data(site, listing)
+          job = modify_data(site, job)
+          jobs << job
         end
+        puts "Pulled #{term}[page: #{page}] job summaries."
       end
-      puts "Pulled #{term} job summaries."
     end
   end
 
-  def get_bodies
-    @jobs.each_with_index do |job, i|
-      puts "Job #{i+1} pulled."
+  def pull_summary_data(site, listing)
+    job = Hash.new
+    site["summary"]["fields"].each do |field|
+      if field["attr"]
+        job[field["field"]] = 
+          listing.send(field["method"].to_sym,field["path"])[field["attr"]]
+      else
+        job[field["field"]] = 
+          listing.send(field["method"].to_sym,field["path"]).text
+      end
+    end; job
+  end
+
+  def modify_data(site, job)
+    job["url"] = "#{site["base_url"]}#{job["url"]}"
+    job
+  end
+
+  def get_bodies(site)
+    jobs.each_with_index do |job, i|
       sleep 1
-      visit "http://careers.stackoverflow.com#{job[:url]}"
-      if has_css?("a.employer")
-        job[:company] = find("a.employer").text
+      pull_job_data(site, job)
+      puts "Job #{i+1} pulled."
+    end
+  end
+
+  def pull_job_data(site, job)
+    visit job["url"]
+
+    site["sub_page"]["fields"].each do |field|
+      if field["method"] == "all"
+        if has_css?(field["path"])
+          values = all(field["path"]).map do |elem|
+            elem.send(field["loop_collect"])
+          end
+          job[field["field"]] = values.join(field["join"])
+        end
+      else
+        if has_css?(field["path"])
+          job[field["field"]] = 
+            send(field["method"].to_sym,field["path"]).text
+        end
       end
-      if has_css?("span.location")
-        job[:location] = find("span.location").text
-      end
-      #job[:description] = first("div.description p")
-      description = all("div.description p").map do |p|
-        p.text
-      end
-      job[:description] = description.join("\n")
-      tags = all("div.tags a.post-tag").map do |tag|
-        tag.text
-      end
-      job[:tags] = tags
     end
   end
 
   def send_to_server
-    @jobs.each_with_index do |job, i|
+    jobs.each_with_index do |job, i|
       new_job = {
         position: job[:position],
         location: job[:location],
         description: job[:description],
-        source: "http://careers.stackoverflow.com#{job[:url]}"
+        source: job[:url]
       }
-      RestClient.post(@endpoint, job: new_job){ |response, request, result, &block|
+
+      RestClient.post(endpoint, job: new_job){ |response, request, result, &block|
         case response.code
         when 201
-          @posted_jobs += 1
+          posted_jobs += 1
           puts "Job saved."
         when 302
           puts "Job already exists."
