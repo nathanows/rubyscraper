@@ -22,6 +22,14 @@ class RubyScraper
     @scrape_config = JSON.parse(File.read(@scrape_file))
   end
 
+  # def self.call(opts)
+  #   processor = Scraper.new(opts)
+  #   results   = processor.call
+  #   output    = ApiDispatcher.post(results, opts)
+  #
+  #   return results.count, output.count
+  # end
+
   def scrape(single_site=nil)
     if single_site
       search_site = scrape_config.select { |site| site["name"] == single_site }

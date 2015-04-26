@@ -16,3 +16,21 @@ class RubyScraper
     end
   end
 end
+
+# Refactor (How to call gem)
+#
+# SCRAPE FILE LOAD
+# run from directory containing rubyscrapes.json file (search all contained files?)
+# add -f /path/to/file.json to override
+#
+# ENDPOINT
+# add some option to save to file? some other output format?
+# required flag -e OR --endpoint http://localhost:3000/api/v1/jobs
+#
+# PAGINATION LIMIT
+# defaults to pages set in JSON file
+# add -r OR --records all to pull all records on site
+#
+# SINGLE SITE
+# defaults to running all non-skipped sites
+# add -s OR --site sitename
