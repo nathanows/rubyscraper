@@ -78,11 +78,15 @@ class RubyScraper
     job = Hash.new
     site["summary"]["fields"].each do |field|
       if field["attr"]
-        job[field["field"]] = 
-          listing.send(field["method"].to_sym, field["path"])[field["attr"]]
+        if listing.has_css?(field["path"])
+          job[field["field"]] = 
+            listing.send(field["method"].to_sym, field["path"])[field["attr"]]
+        end
       else
-        job[field["field"]] = 
-          listing.send(field["method"].to_sym, field["path"]).text
+        if listing.has_css?(field["path"])
+          job[field["field"]] = 
+            listing.send(field["method"].to_sym, field["path"]).text
+        end
       end
     end; job
   end
@@ -102,7 +106,6 @@ class RubyScraper
 
   def pull_job_data(site, job)
     visit job["url"]
-
     site["sub_page"]["fields"].each do |field|
       if field["method"] == "all"
         if has_css?(field["path"])

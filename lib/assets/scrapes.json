@@ -119,6 +119,59 @@
     }
   },
   {
+    "name":"weworkremotely",
+    "base_url":"https://weworkremotely.com",
+    "summary":{
+      "url":"/categories/2/jobs",
+      "no_pagination?":"true",
+      "pagination_fmt":"",
+      "pagination_start":"",
+      "pagination_scale":"",
+      "params":[
+      ],
+      "loop":"section.jobs ul li",
+      "fields":[
+        {
+          "field":"position",
+          "method":"find",
+          "path":"span.title"
+        },
+        {
+          "field":"company",
+          "method":"find",
+          "path":"span.company"
+        },
+        {
+          "field":"url",
+          "method":"find",
+          "path":"a",
+          "attr":"href"
+        },
+        {
+          "field":"posting_date",
+          "method":"find",
+          "path":"span.date"
+        }
+      ]
+    },
+    "sub_page":{
+      "fields":[
+        {
+          "field":"location",
+          "method":"find",
+          "path":"span.location"
+        },
+        {
+          "field":"description",
+          "method":"all",
+          "path":"div.listing-container div",
+          "loop_collect":"text",
+          "join":"\n"
+        }
+      ]
+    }
+  },
+  {
     "name":"indeed",
     "skip":"true",
     "base_url":"http://www.indeed.com",
