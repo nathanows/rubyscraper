@@ -126,11 +126,14 @@ class RubyScraper
   def send_to_server
     @scraped_jobs += jobs.length
     jobs.each do |job|
+      tags = job["tags"] || ""
       new_job = {
         position: job["position"],
         location: job["location"],
         description: job["description"],
-        source: job["url"]
+        source: job["url"],
+        company: job["company"],
+        tags: tags.split(", ")
       }
 
       RestClient.post(endpoint, job: new_job){ |response, request, result, &block|
