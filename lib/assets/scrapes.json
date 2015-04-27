@@ -3,19 +3,15 @@
     "name":"stackoverflow",
     "base_url":"http://www.careers.stackoverflow.com",
     "summary":{
-      "url":"/jobs?searchTerm=SEARCHTERM&sort=p",
-      "pagination_fmt":"&pg=",
-      "pagination_start":"1",
-      "pagination_scale":"1",
-      "params":[
-        {
-          "SEARCHTERM":[
-            "ruby",
-            "ruby+on+rails",
-            "javascript"
-          ]
-        }
-      ],
+      "url":"/jobs/tag/ruby?sort=p",
+      "has_sub_pages":"true",
+      "paginated":"true",
+      "pagination":{
+        "format":"&pg=",
+        "start":"1",
+        "scale":"1",
+        "records_per_page":"25"
+      },
       "loop":".listResults .-item",
       "fields":[
         {
@@ -69,13 +65,9 @@
     "name":"rubynow",
     "base_url":"http://jobs.rubynow.com/",
     "summary":{
-      "url":"",
-      "no_pagination?":"true",
-      "pagination_fmt":"",
-      "pagination_start":"",
-      "pagination_scale":"",
-      "params":[
-      ],
+      "url":"/",
+      "has_sub_pages":"false",
+      "paginated":"false",
       "loop":"ul.jobs li",
       "fields":[
         {
@@ -122,13 +114,9 @@
     "name":"weworkremotely",
     "base_url":"https://weworkremotely.com",
     "summary":{
-      "url":"/categories/2/jobs",
-      "no_pagination?":"true",
-      "pagination_fmt":"",
-      "pagination_start":"",
-      "pagination_scale":"",
-      "params":[
-      ],
+      "url":"/categories/2/jobs/",
+      "has_sub_pages":"true",
+      "paginated":"false",
       "loop":"section.jobs ul li",
       "fields":[
         {
@@ -167,119 +155,6 @@
           "path":"div.listing-container div",
           "loop_collect":"text",
           "join":"\n"
-        }
-      ]
-    }
-  },
-  {
-    "name":"indeed",
-    "skip":"true",
-    "base_url":"http://www.indeed.com",
-    "summary":{
-      "url":"/jobs?q=SEARCHTERM&sr=directhire",
-      "pagination_fmt":"&start=",
-      "pagination_start":"0",
-      "pagination_scale":"10",
-      "params":[
-        {
-          "SEARCHTERM":[
-            "ruby",
-            "ruby+on+rails",
-            "junior+web+developer",
-            "ember.js",
-            "full+stack"
-          ]
-        }
-      ],
-      "loop":"div.row.result",
-      "fields":[
-        {
-          "field":"position",
-          "method":"find",
-          "path":"h2.jobtitle a"
-        },
-        {
-          "field":"url",
-          "method":"find",
-          "path":"h2.jobtitle a",
-          "attr":"href"
-        },
-        {
-          "field":"company",
-          "method":"find",
-          "path":"span.company span"
-        },
-        {
-          "field":"location",
-          "method":"find",
-          "path":"span.location span"
-        },
-        {
-          "field":"description",
-          "method":"find",
-          "path":"span.summary span"
-        },
-        {
-          "field":"posting_date",
-          "method":"find",
-          "path":"span.date"
-        }
-      ]
-    },
-    "sub_page":{
-      "fields":[
-      ]
-    }
-  },
-  {
-    "name":"linkedin",
-    "skip":"true",
-    "base_url":"https://www.linkedin.com",
-    "summary":{
-      "url":"/vsearch/j?keywords=SEARCHTERM&openAdvancedForm=true&locationType=I&countryCode=us&rsid=754744171429892349899&orig=FCTD&openFacets=L,C,TP&f_TP=1&pt=jobs&pt=jobs",
-      "pagination_fmt":"&page_num=",
-      "pagination_start":"1",
-      "pagination_scale":"1",
-      "params":[
-        {
-          "SEARCHTERM":[
-            "Ruby",
-            "Ruby+On+Rails",
-            "javascript"
-          ]
-        }
-      ],
-      "loop":"ol.search-results li.result",
-      "fields":[
-        {
-          "field":"position",
-          "method":"find",
-          "path":"a.title"
-        },
-        {
-          "field":"url",
-          "method":"find",
-          "path":"a.title",
-          "attr":"href"
-        },
-        {
-          "field":"company",
-          "method":"find",
-          "path":"div.description a"
-        },
-        {
-          "field":"location",
-          "method":"find",
-          "path":"dl.demographic bdi"
-        }
-      ]
-    },
-    "sub_page":{
-      "fields":[
-        {
-          "field":"description",
-          "method":"find",
-          "path":"div.description-section div.rich-text"
         }
       ]
     }

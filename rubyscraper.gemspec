@@ -13,13 +13,12 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/ndwhtlssthr/rubyscraper'
   s.executables << 'rubyscraper'
 
-  s.add_dependency "capybara"
-  s.add_dependency "poltergeist"
-  s.add_dependency "rest-client"
-  s.add_dependency "slop"
+  s.add_dependency "capybara", "~> 2.4"
+  s.add_dependency "poltergeist", "~> 1.6"
+  s.add_dependency "rest-client", "~> 1.8"
 
   s.add_development_dependency "bundler", "~> 1.9"
   s.add_development_dependency "rake", "~> 10.0"
-  s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'pry'
+  s.add_development_dependency "rspec", "~> 3.0"
+  s.add_development_dependency "pry", "~> 0.10"
 end

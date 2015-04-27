@@ -1,3 +1,6 @@
+require 'capybara'
+require 'capybara/poltergeist'
+
 class Initializer
   def self.capybara_setup
     Capybara.register_driver :poltergeist do |app|
