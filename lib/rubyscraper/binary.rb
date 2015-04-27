@@ -6,7 +6,7 @@ class RubyScraper
       outstream.puts "StackOverflow Job Scraper"
       outstream.puts "---------------------------------------------"
       outstream.puts "Started scraping..."
-      opts = {endpoint: argv[0]}
+      opts = {"endpoint" => argv[0]}
       jobs_scraped, jobs_saved = RubyScraper.call(opts)
       outstream.puts "Scraped #{jobs_scraped} jobs, succesfully posted #{jobs_saved} jobs."
       outstream.puts "---------------------------------------------"
