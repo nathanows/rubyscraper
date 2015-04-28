@@ -2,12 +2,13 @@ require 'capybara'
 require 'capybara/poltergeist'
 
 class SubPageScraper
-  attr_reader :site, :listings
+  attr_reader :site, :listings, :delay
   include Capybara::DSL
 
-  def initialize(site, listings)
+  def initialize(site, listings, delay)
     @site     = site
     @listings = listings
+    @delay    = delay
 
     Capybara.register_driver :poltergeist do |app|
       Capybara::Poltergeist::Driver.new(app, js_errors: false)
@@ -16,10 +17,13 @@ class SubPageScraper
   end
 
   def call
-    @listings.inject [] do |results, listing|
-      sleep 1
-      results << pull_sub_page_data(site, listing)
-    end
+    puts "Pulling #{@listings.count} listings from #{@site["name"]}:"
+    listings = @listings.inject [] do |results, listing|
+      sleep delay
+      listing = pull_sub_page_data(site, listing)
+      listing = listing_cleanup(listing)
+      results << listing
+    end; puts "\n"; listings
   end
 
   def pull_sub_page_data(site, listing)
@@ -38,6 +42,12 @@ class SubPageScraper
             send(field["method"].to_sym,field["path"]).text
         end
       end
-    end; puts listing; listing
+    end; print "."; listing
+  end
+
+  def listing_cleanup(listing)
+    # Remove 'Headquarters: ' from weworkremotely jobs
+    listing["location"].slice!("Headquarter: ") if !listing["location"].to_s.empty?
+    listing
   end
 end

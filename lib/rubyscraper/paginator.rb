@@ -9,7 +9,6 @@ class Paginator
 
   def define_pagination_params
     if paginated_site?
-      # define params
       @steps  = url_page_addons
       @add_on = pagination["format"]
     else

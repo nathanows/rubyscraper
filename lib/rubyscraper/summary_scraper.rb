@@ -56,6 +56,7 @@ class SummaryScraper
   end
 
   def listing_cleanup(site, listing)
+    # Add base url if not present
     unless listing["url"].match(/^http/)
       listing["url"] = "#{site["base_url"]}#{listing["url"]}"
     end

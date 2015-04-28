@@ -4,24 +4,25 @@ require 'rubyscraper/summary_scraper'
 require 'rubyscraper/sub_page_scraper'
 
 class Processor
-  attr_reader :sites, :record_limit, :single_site
+  attr_reader :sites, :record_limit, :single_site, :scrape_delay
 
-  def initialize(opts)
-    @scrape_file      = opts[:file] || File.expand_path('../../assets/scrapes.json', __FILE__)
-    @scrape_config    = JSON.parse(File.read(@scrape_file))
-    @sites            = @scrape_config
-    @single_site      = opts[:single_site]
-    @record_limit     = opts[:record_limit] || 50
+  def initialize(config_file, single_site, record_limit, scrape_delay)
+    @scrape_file   = config_file
+    @scrape_config = JSON.parse(File.read(@scrape_file))
+    @sites         = @scrape_config
+    @single_site   = single_site
+    @record_limit  = record_limit
+    @scrape_delay  = scrape_delay
   end
 
   def call
-    single_site ? scrape_single_site : scrape_all_sites
+    !single_site.empty? ? scrape_single_site : scrape_all_sites
   end
 
   private
 
   def scrape_single_site
-    site = sites.select { |s| s["name"] == single_site }
+    site = sites.select { |s| s["name"] == single_site }.first
     scrape_site(site)
   end
 
@@ -36,7 +37,7 @@ class Processor
     paginator.define_pagination_params
 
     results = SummaryScraper.new(site, paginator.add_on, paginator.steps).call
-    results = SubPageScraper.new(site, results).call if has_sub_pages?(site)
+    results = SubPageScraper.new(site, results, scrape_delay).call if has_sub_pages?(site)
     results
   end
 
