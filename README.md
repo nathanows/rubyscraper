@@ -35,7 +35,29 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+Usage: RubyScraper [options]
+
+Specific options:
+
+REQUIRED:
+    -f, --file FILENAME.JSON         Specify the file_name of your RubyScraper config file
+
+REQUIRED (if using as service to send results as post requests):
+    -e, --endpoint URL               Enter the api endpoint URL here
+                                       (If using scraper as a service to send post requests to server)
+
+OPTIONAL:
+    -r, --record-limit N             Pull N records per site
+                                       (approximate because if there are 25 records per
+                                       page, and 51 is provided, it will go to 3 pages)
+    -d, --delay N                    Delay N seconds before executing
+    -s, --site SITENAME              Scrape a single SITENAME from the config file
+
+Common options:
+    -h, --help                       Show this message
+        --version                    Show version
+```
 
 ## Contributing
 
