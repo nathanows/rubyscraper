@@ -2,6 +2,26 @@
 
 RubyScraper is a gem built to scrape 1-2 layer listing sites. The original intent was, and the included example scrapes.json config file is for scraping job posting sites. The gem allows you to pull summary listings from a main index page, then follow in the nested url's to sub-pages for those listings to scrape additional data. The example is for job sites, but this could easily be used for blogs, recipe sites, news sites, products, etc.. 
 
+RubyScraper only currently allows sending results to an api endpoint. It will *eventually* be built out to allow additional output options (csv, etc.).
+
+**NOTE**: Only outputting specified parameters in post request for the time being... **TODO** Dynamically generate post request data.
+
+######Usage Examples:
+```
+# Scrapes all sites defined in the scrapes.json file (located in the PWD) and sends results as a POST request to
+  the specified endpoint.
+
+rubyscraper -f scrapes.json -e http://myserver.com/api/v1/post-endpoint
+
+# Scrapes only the site with name 'stackoverflow' in the scrapes.json file
+rubyscraper -f scrapes.json -e http://myserver.com/api/v1/post-endpoint -s stackoverflow 
+
+# Pulls full pages with records of at least 75 records (defaults to 50)
+  NOTE: For unpaginated sites, all results are scraped
+  NOTE: For a site with 25 records/page, a -r 51 will pull 3 full pages, or 75 records
+rubyscraper -f scrapes.json -e http://myserver.com/api/v1/post-endpoint -r 75
+```
+
 ## Installation
 ### Dependency
 RubyScraper relies on PhantomJS as its headless web browser. Install this before installing the gem with:
