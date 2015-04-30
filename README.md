@@ -1,6 +1,6 @@
 # RubyScraper
 
-RubyScraper is a gem built 
+RubyScraper is a gem built to scrape 1-2 layer listing sites. The original intent was, and the included example scrapes.json config file is for scraping job posting sites. The gem allows you to pull summary listings from a main index page, then follow in the nested url's to sub-pages for those listings to scrape additional data. The example is for job sites, but this could easily be used for blogs, recipe sites, news sites, products, etc.. 
 
 ## Installation
 ### Dependency
@@ -18,22 +18,88 @@ gem install rubyscraper
 ```
 
 ### Gemfile
+
 *Work in Progress*
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'rubyscraper'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install rubyscraper
 
 ## Usage
+
+First configure a scrape config file. See the example file (`scrapes.json`) for format and options. All available options are specified in the contained examples. As a rough overview though:
+
+####Scrape Config File Options
+
+```
+[
+  {
+    "name":"stackoverflow",                             # => REQUIRED Site Name (No spaces)
+    "base_url":"http://www.careers.stackoverflow.com",  # => REQUIRED Base Site URL (Thru domain, no trailing '/')
+    "summary":{                                         # => REQUIRED Summary block (main scrape page)
+      "url":"/jobs/tag/ruby?sort=p",                    # => REQUIRED Any url additions to access main scrape page
+                                                                      If only pulling base site use "/"
+      "has_sub_pages":"true",                           # => REQUIRED Are there sub-pages to scrape?
+      "paginated":"true",                               # => REQUIRED Are all listings on the main page? Or is the 
+                                                                      site paginated?
+      "pagination":{                                    # => OPTIONAL Required for paginated sites
+        "format":"&pg=",                                              - URL pagination param
+        "start":"1",                                                  - Starting point (some sites go by records)
+        "scale":"1",                                                  - Whats the incrementer for pages/records
+        "records_per_page":"25"                                       - Number of records on each page
+      },
+      "loop":".listResults .-item",                     # => REQUIRED The main container of each scrape element
+      "fields":[                                        # => REQUIRED Which fields should be scraped from this page
+        {
+          "field":"position",                                - Output file name
+          "method":"find",                                   - Capybara search method (find: only 1 matching elem)
+          "path":"h3.-title a"                               - Path to containing element
+        },
+        {
+          "field":"url",                                     - To scrape sub-pages, this is required with name 'url'
+          "method":"find",
+          "path":"h3.-title a",
+          "attr":"href"                                      - To access an html attribute, add an attr row
+        },
+        {
+          "field":"posting_date",
+          "method":"first",                                  - To access the first occurence of a given element
+          "path":"p._muted"
+        }
+      ]
+    },
+    "sub_page":{                                        # => OPTIONAL if scraping from sub-pages, list fields
+      "fields":[
+        {
+          "field":"company",
+          "method":"find",
+          "path":"a.employer"
+        },
+        {
+          "field":"location",
+          "method":"find",
+          "path":"span.location"
+        },
+        {
+          "field":"description",
+          "method":"all",                                    - Use 'all' method to collect data from multiple elems
+          "path":"div.description p",                        - Path to the collection of elems to be aggregated
+          "loop_collect":"text",                             - What is being selected from that collection
+          "join":"\n"                                        - How to join output string
+        },
+        {
+          "field":"tags",
+          "method":"all",
+          "path":"div.tags a.post-tag",
+          "loop_collect":"text",
+          "join":", "
+        }
+      ]
+    }
+  }
+]
+```
+
+
+#### RubyScraper runtime options
+
+Type `rubyscraper -h` for full option list.
 
 ```
 Usage: RubyScraper [options]
